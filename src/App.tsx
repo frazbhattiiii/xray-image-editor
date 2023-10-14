@@ -5,6 +5,7 @@ import ForgotPasswordPage from "@/pages/auth/ForgotPassword";
 import UpdatePasswordPage from "@/pages/auth/UpdatePassword";
 import ImageEditor from "@/pages/image-editor/ImageEditor";
 import './App.css';
+import PatientList from "./pages/patient-lists/PatientList";
 const App = () => {
   return (
     <div>
@@ -15,6 +16,7 @@ const App = () => {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/update-password" element={<UpdatePasswordPage />} />
         <Route path="/edit-image" element={<ImageEditor />} />
+        <Route path="/list-patients" element={<PatientList />} />
       </Routes>
     </div>
   )
