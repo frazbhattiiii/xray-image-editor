@@ -218,7 +218,7 @@ function ImageEditor() {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger onClick={handleAddPointClick}>
-              <Plus className="h-8 w-8 p-2 text-red-500 rounded-md bg-slate-200"/>
+              <Plus className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200"/>
               </TooltipTrigger>
             <TooltipContent>
               <p>Add Point to Canvas</p>
@@ -226,7 +226,7 @@ function ImageEditor() {
           </Tooltip>
           <Tooltip>
             <TooltipTrigger onClick={handleRemovePointClick}>
-              <Minus className="h-8 w-8 p-2 text-red-500 rounded-md bg-slate-200"/>
+              <Minus className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200"/>
               </TooltipTrigger>
             <TooltipContent>
               <p>Remove Point from the Canvas</p>
@@ -234,7 +234,7 @@ function ImageEditor() {
           </Tooltip>
           <Tooltip>
             <TooltipTrigger onClick={handleSaveImageClick}>
-              <ArrowDownToLine className="h-8 w-8 p-2 text-red-500 rounded-md bg-slate-200"/>
+              <ArrowDownToLine className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200"/>
             </TooltipTrigger>
             <TooltipContent>
               <p>Download Image</p>
