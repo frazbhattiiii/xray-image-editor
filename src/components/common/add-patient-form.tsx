@@ -1,19 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarIcon, CaretSortIcon, CheckIcon } from "@radix-ui/react-icons"
-import { format } from "date-fns"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
+import { CalendarIcon, CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
+import { format } from "date-fns";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 import {
   Form,
   FormControl,
@@ -22,25 +22,25 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { toast } from "@/components/ui/use-toast"
+} from "@/components/ui/popover";
+import { toast } from "@/components/ui/use-toast";
 import { Toaster } from "../ui/toaster";
 
-const  gender = [
+const gender = [
   { label: "Male", value: "male" },
   { label: "Female", value: "female" },
   { label: "Intersex", value: "intersex" },
-] as const
+] as const;
 
 const patientFormSchema = z.object({
-  patientId: z.string().min(2,{
-    message:"Patient Id must be at least 2 characters"
+  patientId: z.string().min(2, {
+    message: "Patient Id must be at least 2 characters",
   }),
   name: z
     .string()
@@ -56,21 +56,21 @@ const patientFormSchema = z.object({
   gender: z.string({
     required_error: "Please select patient's gender",
   }),
-})
+});
 
-type PatientFormValues = z.infer<typeof patientFormSchema>
+type PatientFormValues = z.infer<typeof patientFormSchema>;
 
 // This can come from your database or API.
 const defaultValues: Partial<PatientFormValues> = {
   // name: "Your name",
   // dob: new Date("2023-01-23"),
-}
+};
 
 export function AddPatientForm() {
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(patientFormSchema),
     defaultValues,
-  })
+  });
 
   function onSubmit(data: PatientFormValues) {
     toast({
@@ -80,16 +80,16 @@ export function AddPatientForm() {
           <code className="text-white">{JSON.stringify(data, null, 2)}</code>
         </pre>
       ),
-    })
+    });
     // reset all form values
-    form.reset()
+    form.reset();
   }
 
   return (
     <Form {...form}>
-      <Toaster/>
+      <Toaster />
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-      <FormField
+        <FormField
           control={form.control}
           name="patientId"
           render={({ field }) => (
@@ -152,9 +152,7 @@ export function AddPatientForm() {
                   />
                 </PopoverContent>
               </Popover>
-              <FormDescription>
-                
-              </FormDescription>
+              <FormDescription></FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -177,9 +175,7 @@ export function AddPatientForm() {
                       )}
                     >
                       {field.value
-                        ? gender.find(
-                            (gen) => gen.value === field.value
-                          )?.label
+                        ? gender.find((gen) => gen.value === field.value)?.label
                         : "Select Gender"}
                       <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
@@ -195,7 +191,7 @@ export function AddPatientForm() {
                           value={gen.label}
                           key={gen.value}
                           onSelect={() => {
-                            form.setValue("gender", gen.value)
+                            form.setValue("gender", gen.value);
                           }}
                         >
                           <CheckIcon
@@ -217,8 +213,10 @@ export function AddPatientForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="bg-red-500 hover:bg-red-600 w-full ">Add Patient</Button>
+        <Button type="submit" className="bg-red-500 hover:bg-red-600 w-full ">
+          Add Patient
+        </Button>
       </form>
     </Form>
-  )
+  );
 }

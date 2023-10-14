@@ -88,7 +88,7 @@ export function UserAuthForm({
                 className="mt-2"
               />
               <button
-              type="button"
+                type="button"
                 className="absolute mt-2 inset-y-0 right-0 pr-3 flex items-center bg-transparent text-black cursor-pointer"
                 onClick={togglePasswordVisibility}
               >

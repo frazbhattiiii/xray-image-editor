@@ -6,9 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import toast, { Toaster } from "react-hot-toast";
 
-
 interface ForgotPasswordProps extends React.HTMLAttributes<HTMLDivElement> {}
-
 
 export default function ForgotPassword({
   className,
@@ -21,12 +19,11 @@ export default function ForgotPassword({
     setIsLoading(true);
 
     const email = (event.target as HTMLFormElement).email.value;
-    console.log(email)
-    if(!email){
-      toast.error("Please enter your email")
-      return
+    console.log(email);
+    if (!email) {
+      toast.error("Please enter your email");
+      return;
     }
-      
   }
 
   return (
@@ -64,7 +61,6 @@ export default function ForgotPassword({
           <span className="w-full border-t" />
         </div>
       </div>
- 
     </div>
   );
 }

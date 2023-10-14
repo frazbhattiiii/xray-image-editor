@@ -63,17 +63,17 @@ const PatientList = () => {
             <DialogHeader>
               <DialogTitle className="mb-4">Add a new Patient</DialogTitle>
               <DialogDescription>
-                <AddPatientForm/>
+                <AddPatientForm />
               </DialogDescription>
             </DialogHeader>
           </DialogContent>
         </Dialog>
       </div>
-      <div className="flex flex-col items-center justify-center mt-14 mx-14 px-44 gap-14">
+      <div className="flex flex-col items-center justify-center mt-14 mx-10 px-20 gap-14">
         <div className="flex">
           <input
             type="text"
-            className="px-3 py-2 rounded-l-lg border border-gray-300 focus:outline-none focus:none w-full"
+            className="px-3 py-2 rounded-l-lg border border-gray-300 focus:outline-none focus:none w-80"
             placeholder="Search..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
