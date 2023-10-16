@@ -5,9 +5,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Plus,Minus,ArrowDownToLine,PencilLine,TriangleRight } from "lucide-react";
+import {
+  Plus,
+  Minus,
+  ArrowDownToLine,
+  PencilLine,
+  Sun,
+  Contrast,
+} from "lucide-react";
 import { imagePathAtom } from "@/atom/atom";
 import { useAtom } from "jotai";
+import { Button } from "../ui/button";
 interface Point {
   x: number;
   y: number;
@@ -21,8 +29,7 @@ interface Line {
   end: Point;
 }
 const CANVAS_WIDTH = 600;
-const CANVAS_HEIGHT = 800;
-
+const CANVAS_HEIGHT = 600;
 
 function ImageEditorComponent() {
   const [points, setPoints] = useState<Point[]>([]);
@@ -40,10 +47,11 @@ function ImageEditorComponent() {
   const [selectedPoint, setSelectedPoint] = useState<Point | null>(null);
   const [startLinePoint, setStartLinePoint] = useState<Point | null>(null);
   const [, setIsDialogOpen] = useState<boolean>(false);
-  const [imagePath,setImagePath] = useAtom(imagePathAtom);
-  const [scaleX, setScaleX] = useState(1);
-  const [scaleY, setScaleY] = useState(1);
-
+  const [brightness, setBrightness] = useState(100);
+  const [contrast, setContrast] = useState(100);
+  const [imagePath, ] = useAtom(imagePathAtom);
+  const [, setScaleX] = useState(1);
+  const [, setScaleY] = useState(1);
 
   const drawPoints = (ctx: CanvasRenderingContext2D, pointsToDraw: Point[]) => {
     ctx.fillStyle = "yellow";
@@ -61,7 +69,6 @@ function ImageEditorComponent() {
       ctx.fillStyle = "yellow";
     });
   };
-
 
   const drawLines = (ctx: CanvasRenderingContext2D, linesToDraw: Line[]) => {
     ctx.strokeStyle = "red";
@@ -85,7 +92,25 @@ function ImageEditorComponent() {
     // Draw the points
     drawPoints(ctx, points);
   };
- 
+
+  const handleIncreaseBrightness = () => {
+    // Increase brightness (e.g., by 10%)
+    setBrightness(brightness + 10);
+  };
+  const handleDecreaseBrightness = () => {
+    // Increase brightness (e.g., by 10%)
+    setBrightness(brightness - 10);
+  };
+
+  const handleIncreaseContrast = () => {
+    // Increase contrast (e.g., by 10%)
+    setContrast(contrast + 10);
+  };
+  const handleDecreaseContrast = () => {
+    // Increase contrast (e.g., by 10%)
+    setContrast(contrast - 10);
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext("2d");
@@ -116,6 +141,17 @@ function ImageEditorComponent() {
     }
   }, [points, lines]);
 
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (ctx) {
+      // Apply brightness and contrast adjustments here
+      ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+
+      // Clear and redraw the image with adjustments
+      drawAll(ctx);
+    }
+  }, [brightness, contrast]);
 
   const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (isDrawingLine.current) {
@@ -137,7 +173,6 @@ function ImageEditorComponent() {
       setIsDrawingLine(false);
     }
   };
-
 
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -187,12 +222,11 @@ function ImageEditorComponent() {
     setPointNameInput("");
   };
 
-
   const handleAddPointClick = () => {
     isAddingPoint.current = true;
     isRemovingPoint.current = false;
     isRenamingPoint.current = false; // Reset renaming flag
-    isDrawingLine.current =false;
+    isDrawingLine.current = false;
     openDialog();
     setShowPointNameInput(false);
   };
@@ -225,31 +259,31 @@ function ImageEditorComponent() {
   const openDialog = () => {
     setIsDialogOpen(true);
   };
-  console.log(imagePath)
+  console.log(imagePath);
 
   return (
-    <>
+    <div className="">
       <div className="flex gap-4 mb-4">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger onClick={handleAddPointClick}>
-              <Plus className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200"/>
-              </TooltipTrigger>
+              <Plus className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200" />
+            </TooltipTrigger>
             <TooltipContent>
               <p>Add Point to Canvas</p>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger onClick={handleRemovePointClick}>
-              <Minus className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200"/>
-              </TooltipTrigger>
+              <Minus className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200" />
+            </TooltipTrigger>
             <TooltipContent>
               <p>Remove Point from the Canvas</p>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger onClick={handleSaveImageClick}>
-              <ArrowDownToLine className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200"/>
+              <ArrowDownToLine className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200" />
             </TooltipTrigger>
             <TooltipContent>
               <p>Download Image</p>
@@ -263,19 +297,57 @@ function ImageEditorComponent() {
               <p>Draw a Line on the Canvas</p>
             </TooltipContent>
           </Tooltip>
+          <Tooltip>
+            <TooltipTrigger>
+              <Sun className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200" />
+            </TooltipTrigger>
+            <TooltipContent className="flex flex-col gap-2">
+              <p className="text-gray-600 text-sm font-medium text-center">
+                {" "}
+                Brightness{" "}
+              </p>
+              <div className="flex gap-4">
+                <Plus
+                  className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200 cursor-pointer"
+                  onClick={handleIncreaseBrightness}
+                />
+                <Minus
+                  className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200 cursor-pointer"
+                  onClick={handleDecreaseBrightness}
+                />
+              </div>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger>
+              <Contrast className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200" />
+            </TooltipTrigger>
+            <TooltipContent className="flex flex-col gap-2">
+              <p className="text-gray-600 text-sm font-medium text-center">
+                {" "}
+                Contrast{" "}
+              </p>
+              <div className="flex gap-4">
+                <Plus
+                  className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200 cursor-pointer"
+                  onClick={handleIncreaseContrast}
+                />
+                <Minus
+                  className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200 cursor-pointer"
+                  onClick={handleDecreaseContrast}
+                />
+              </div>
+            </TooltipContent>
+          </Tooltip>
         </TooltipProvider>
-
       </div>
-      <img
-        ref={imageRef}
-        src={imagePath}
-        alt="Image"
-        className='hidden'
-        
-      />
-      <canvas ref={canvasRef} onClick={handleCanvasClick} 
+      <img ref={imageRef} src={imagePath} alt="Image" className="hidden" />
+      <canvas
+        ref={canvasRef}
+        onClick={handleCanvasClick}
         onMouseDown={handleCanvasMouseDown}
-        onMouseUp={handleCanvasMouseUp}/>
+        onMouseUp={handleCanvasMouseUp}
+      />
 
       {showPointNameInput && (
         <div className="fixed inset-0 flex items-center justify-center z-10">
@@ -289,23 +361,23 @@ function ImageEditorComponent() {
               className="border p-2 mb-2 w-full"
             />
             <div className="text-right">
-              <button
+              <Button
                 onClick={handlePointNameInputConfirm}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg mr-2"
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg mr-2"
               >
                 Confirm
-              </button>
-              <button
-                onClick={() => setIsDialogOpen(false)}
-                className="px-4 py-2 bg-gray-400 text-white rounded-lg"
+              </Button>
+              <Button
+                onClick={() => setShowPointNameInput(false)}
+                className="px-4 py-2 bg-[#722f99] hover:bg-[#60178a] text-white rounded-lg"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
