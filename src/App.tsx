@@ -4,8 +4,10 @@ import SignUp from "@/pages/auth/Signup";
 import ForgotPasswordPage from "@/pages/auth/ForgotPassword";
 import UpdatePasswordPage from "@/pages/auth/UpdatePassword";
 import ImageEditor from "@/pages/image-editor/ImageEditor";
+import PatientList from "@/pages/patient-lists/PatientList";
+import ImageUpload from "@/pages/image-upload/ImageUpload";
+import Timeline from "@/pages/timeline/Timeline";
 import './App.css';
-import PatientList from "./pages/patient-lists/PatientList";
 const App = () => {
   return (
     <div>
@@ -17,6 +19,8 @@ const App = () => {
         <Route path="/update-password" element={<UpdatePasswordPage />} />
         <Route path="/edit-image" element={<ImageEditor />} />
         <Route path="/list-patients" element={<PatientList />} />
+        <Route path="/upload-image" element={<ImageUpload />} />
+        <Route path="/timeline" element={<Timeline />} />
       </Routes>
     </div>
   )
