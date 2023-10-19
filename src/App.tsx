@@ -7,12 +7,13 @@ import ImageEditor from "@/pages/image-editor/ImageEditor";
 import PatientList from "@/pages/patient-lists/PatientList";
 import ImageUpload from "@/pages/image-upload/ImageUpload";
 import Timeline from "@/pages/timeline/Timeline";
+import Home from "./pages/Home";
 import './App.css';
 const App = () => {
   return (
     <div>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
