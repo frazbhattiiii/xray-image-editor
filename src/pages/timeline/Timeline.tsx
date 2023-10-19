@@ -38,9 +38,7 @@ const timeLine = [
 ]
 const TimeLineList = (
   {
-    id,
     title,
-    description,
     images
   }:any
 )=>{
