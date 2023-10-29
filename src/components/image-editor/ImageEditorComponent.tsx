@@ -12,13 +12,17 @@ import {
   PencilLine,
   Sun,
   Contrast,
+  Hand,
 } from "lucide-react";
 import { imagePathAtom } from "@/atom/atom";
 import { useAtom } from "jotai";
 import { Button } from "../ui/button";
+
+ 
 interface Point {
   x: number;
   y: number;
+  name?: string;
 }
 
 interface PointNames {
@@ -44,30 +48,39 @@ function ImageEditorComponent() {
   const [pointNames, setPointNames] = useState<PointNames>({});
   const [pointNameInput, setPointNameInput] = useState<string>("");
   const [showPointNameInput, setShowPointNameInput] = useState<boolean>(false);
+  const [draggingPoint, setDraggingPoint] = useState<Point | null>(null);
   const [selectedPoint, setSelectedPoint] = useState<Point | null>(null);
   const [startLinePoint, setStartLinePoint] = useState<Point | null>(null);
+  const isDraggingPoint = useRef<boolean>(false);
   const [, setIsDialogOpen] = useState<boolean>(false);
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
   const [imagePath, ] = useAtom(imagePathAtom);
   const [, setScaleX] = useState(1);
   const [, setScaleY] = useState(1);
+  const [isHandToolActive, setIsHandToolActive] = useState<boolean>(false);
+
 
   const drawPoints = (ctx: CanvasRenderingContext2D, pointsToDraw: Point[]) => {
     ctx.fillStyle = "yellow";
     ctx.font = "18px Arial";
 
     pointsToDraw.forEach((point) => {
+      // Draw the circle in yellow
+      ctx.fillStyle = "yellow";
       ctx.beginPath();
       ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
       ctx.fill();
+  
+      // Draw the text in white
       ctx.fillStyle = "white";
       const pointName = pointNames[`${point.x}-${point.y}`];
+      point.name = pointName;
       if (pointName) {
         ctx.fillText(pointName, point.x + 10, point.y - 10);
       }
-      ctx.fillStyle = "yellow";
     });
+    ctx.fillStyle = "yellow";
   };
 
   const drawLines = (ctx: CanvasRenderingContext2D, linesToDraw: Line[]) => {
@@ -83,14 +96,22 @@ function ImageEditorComponent() {
   };
 
   const drawAll = (ctx: CanvasRenderingContext2D) => {
-    // Clear the canvas
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    // Draw the scaled image
+  
     ctx.drawImage(imageRef.current!, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    // Draw the lines
+
     drawLines(ctx, lines);
-    // Draw the points
     drawPoints(ctx, points);
+  };
+
+  const findClosePoint = (x: number, y: number): Point | null => {
+    for (let point of points) {
+      const distance = Math.sqrt((point.x - x) ** 2 + (point.y - y) ** 2);
+      if (distance <= 10) {
+        return point;
+      }
+    }
+    return null;
   };
 
   const handleIncreaseBrightness = () => {
@@ -110,6 +131,9 @@ function ImageEditorComponent() {
     // Increase contrast (e.g., by 10%)
     setContrast(contrast - 10);
   };
+  
+  
+
 
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -133,6 +157,8 @@ function ImageEditorComponent() {
     }
   }, []);
 
+
+  
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -153,7 +179,32 @@ function ImageEditorComponent() {
     }
   }, [brightness, contrast]);
 
+  const enableDragging = () => {
+    isDraggingPoint.current = true;
+    isAddingPoint.current = false;
+    isRemovingPoint.current = false;
+    isDrawingLine.current = false;
+    setShowPointNameInput(false);
+  };
+
   const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    console.log("Dragging point:", draggingPoint)
+    const x = e.nativeEvent.offsetX;
+    const y = e.nativeEvent.offsetY;
+    const closePoint = findClosePoint(x, y);
+
+    if (isHandToolActive) {
+      const closePoint = findClosePoint(x, y);
+      if (closePoint) {
+        setDraggingPoint(closePoint);
+      }
+      return;
+    }
+
+    if (isDraggingPoint.current && closePoint) {
+      setDraggingPoint(closePoint);
+    }
+
     if (isDrawingLine.current) {
       const x = e.nativeEvent.offsetX;
       const y = e.nativeEvent.offsetY;
@@ -169,10 +220,50 @@ function ImageEditorComponent() {
   };
 
   const handleCanvasMouseUp = () => {
+    if (isDraggingPoint.current && draggingPoint) {
+      const oldKey = `${draggingPoint.x}-${draggingPoint.y}`;
+      const newName = pointNames[oldKey];
+      
+      if (newName) {
+        const newKey = `${draggingPoint.x}-${draggingPoint.y}`;
+        setPointNames((prevPointNames) => {
+          const updatedPointNames = { ...prevPointNames };
+          updatedPointNames[newKey] = newName;
+          delete updatedPointNames[oldKey];
+          return updatedPointNames;
+        });
+      }
+    }
+  
+    setDraggingPoint(null);
     if (isDrawingLine.current) {
       setIsDrawingLine(false);
     }
   };
+  
+
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const x = e.nativeEvent.offsetX;
+    const y = e.nativeEvent.offsetY;
+
+    if (isHandToolActive && draggingPoint) {
+      const x = e.nativeEvent.offsetX;
+      const y = e.nativeEvent.offsetY;
+      setDraggingPoint({ x, y, name: draggingPoint.name });
+    }
+  
+    if (isDraggingPoint.current && draggingPoint) {
+      setDraggingPoint({ x, y, name: draggingPoint.name });
+      const updatedPoints = points.map((point) => {
+        if (point.x === draggingPoint.x && point.y === draggingPoint.y) {
+          return { x, y, name: point.name }; // Include the name
+        }
+        return point;
+      });
+      setPoints(updatedPoints);
+    }
+  };
+  
 
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -298,6 +389,18 @@ function ImageEditorComponent() {
             </TooltipContent>
           </Tooltip>
           <Tooltip>
+            <TooltipTrigger onClick={() => setIsHandToolActive(!isHandToolActive)}>
+              <Hand className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Drag points on the canvas</p>
+            </TooltipContent>
+          </Tooltip>
+          
+          
+
+          
+          <Tooltip>
             <TooltipTrigger>
               <Sun className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200" />
             </TooltipTrigger>
@@ -342,17 +445,19 @@ function ImageEditorComponent() {
         </TooltipProvider>
       </div>
       <img ref={imageRef} src={imagePath} alt="Image" className="hidden" />
+      
       <canvas
         ref={canvasRef}
         onClick={handleCanvasClick}
         onMouseDown={handleCanvasMouseDown}
         onMouseUp={handleCanvasMouseUp}
+        onMouseMove={handleCanvasMouseMove}
       />
 
       {showPointNameInput && (
         <div className="fixed inset-0 flex items-center justify-center z-10">
           <div className="bg-white w-1/4 p-4 rounded-lg shadow-lg">
-            <h2 className="text-lg font-semibold mb-2">Rename Point</h2>
+            <h2 className="text-lg font-semibold mb-2">New Point</h2>
             <input
               type="text"
               value={pointNameInput}
