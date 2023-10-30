@@ -59,6 +59,7 @@ function ImageEditorComponent() {
   const [, setScaleX] = useState(1);
   const [, setScaleY] = useState(1);
   const [isHandToolActive, setIsHandToolActive] = useState<boolean>(false);
+  
 
 
   const drawPoints = (ctx: CanvasRenderingContext2D, pointsToDraw: Point[]) => {
@@ -192,6 +193,9 @@ function ImageEditorComponent() {
     const x = e.nativeEvent.offsetX;
     const y = e.nativeEvent.offsetY;
     const closePoint = findClosePoint(x, y);
+    if (closePoint) {
+      setDraggingPoint(closePoint);
+    }
 
     if (isHandToolActive) {
       const closePoint = findClosePoint(x, y);
@@ -220,6 +224,7 @@ function ImageEditorComponent() {
   };
 
   const handleCanvasMouseUp = () => {
+    setDraggingPoint(null);
     if (isDraggingPoint.current && draggingPoint) {
       const oldKey = `${draggingPoint.x}-${draggingPoint.y}`;
       const newName = pointNames[oldKey];
@@ -250,6 +255,17 @@ function ImageEditorComponent() {
       const x = e.nativeEvent.offsetX;
       const y = e.nativeEvent.offsetY;
       setDraggingPoint({ x, y, name: draggingPoint.name });
+    }
+
+    if (draggingPoint) {
+      const updatedPoints = points.map((point) => {
+        if (point.x === draggingPoint.x && point.y === draggingPoint.y) {
+          return { x, y };
+        }
+        return point;
+      });
+      setPoints(updatedPoints);
+      setDraggingPoint({ x, y });
     }
   
     if (isDraggingPoint.current && draggingPoint) {
@@ -347,6 +363,13 @@ function ImageEditorComponent() {
     setShowPointNameInput(false);
   };
 
+  const handleHandToolClick = ()=>{
+    isAddingPoint.current = false;
+    isRemovingPoint.current = false;
+    isDrawingLine.current = false;
+    setIsHandToolActive(true);
+  }
+
   const openDialog = () => {
     setIsDialogOpen(true);
   };
@@ -389,7 +412,7 @@ function ImageEditorComponent() {
             </TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger onClick={() => setIsHandToolActive(!isHandToolActive)}>
+            <TooltipTrigger onClick={handleHandToolClick}>
               <Hand className="h-8 w-8 p-2 text-gray-500 rounded-md bg-slate-200" />
             </TooltipTrigger>
             <TooltipContent>
