@@ -36,10 +36,10 @@ const CANVAS_HEIGHT = 600;
 
 function ImageEditorComponent() {
   const [points, setPoints] = useState<Point[]>([
-     { x: 50, y: 50, name: 'Point 1' },
-  { x: 150, y: 50, name: 'Point 2' },
-  { x: 50, y: 150, name: 'Point 3' },
-  { x: 150, y: 150, name: 'Point 4' }
+    { x: 50, y: 50 },
+    { x: 150, y: 50 },
+    { x: 50, y: 150 },
+    { x: 150, y: 150 },
   ]);
   const [, setIsDrawingLine] = useState<boolean>(false);
   const [lines, setLines] = useState<Line[]>([]);
@@ -49,7 +49,12 @@ function ImageEditorComponent() {
   const isRemovingPoint = useRef<boolean>(false);
   const isRenamingPoint = useRef<boolean>(false); // Add a flag for renaming
   const isDrawingLine = useRef<boolean>(false);
-  const [pointNames, setPointNames] = useState<PointNames>({});
+  const [pointNames, setPointNames] = useState<PointNames>({
+    "50-50": "Point 1",
+    "150-50": "Point 2",
+    "50-150": "Point 3",
+    "150-150": "Point 4",
+  });
   const [pointNameInput, setPointNameInput] = useState<string>("");
   const [showPointNameInput, setShowPointNameInput] = useState<boolean>(false);
   const [draggingPoint, setDraggingPoint] = useState<Point | null>(null);
@@ -63,6 +68,7 @@ function ImageEditorComponent() {
   const [, setScaleX] = useState(1);
   const [, setScaleY] = useState(1);
   const [isHandToolActive, setIsHandToolActive] = useState<boolean>(false);
+  
 
   const drawPoints = (ctx: CanvasRenderingContext2D, pointsToDraw: Point[]) => {
     ctx.fillStyle = "yellow";
@@ -225,7 +231,7 @@ function ImageEditorComponent() {
     if (isDraggingPoint.current && draggingPoint) {
       const oldKey = `${draggingPoint.x}-${draggingPoint.y}`;
       const newName = pointNames[oldKey];
-      
+
       if (newName) {
         const newKey = `${draggingPoint.x}-${draggingPoint.y}`;
         setPointNames((prevPointNames) => {
@@ -240,7 +246,10 @@ function ImageEditorComponent() {
       return prevLines.map((line) => {
         if (!draggingPoint) return line; // Add this null check
 
-        if (line.start.x === draggingPoint.x && line.start.y === draggingPoint.y) {
+        if (
+          line.start.x === draggingPoint.x &&
+          line.start.y === draggingPoint.y
+        ) {
           return { ...line, start: { x: draggingPoint.x, y: draggingPoint.y } };
         }
         if (line.end.x === draggingPoint.x && line.end.y === draggingPoint.y) {
@@ -268,29 +277,28 @@ function ImageEditorComponent() {
     }
 
     if (draggingPoint) {
-    const updatedPoints = points.map((point) => {
+      const updatedPoints = points.map((point) => {
         if (point.x === draggingPoint.x && point.y === draggingPoint.y) {
-            return { x, y, name: point.name }; // Include the name
+          return { x, y, name: point.name }; // Include the name
         }
         return point;
-    });
+      });
 
-    const oldKey = `${draggingPoint.x}-${draggingPoint.y}`;
-    const newKey = `${x}-${y}`;
+      const oldKey = `${draggingPoint.x}-${draggingPoint.y}`;
+      const newKey = `${x}-${y}`;
 
-    // Update pointNames with the new key
-    setPointNames((prevPointNames) => {
+      // Update pointNames with the new key
+      setPointNames((prevPointNames) => {
         const updatedPointNames = { ...prevPointNames };
         const name = updatedPointNames[oldKey];
         delete updatedPointNames[oldKey];
         updatedPointNames[newKey] = name;
         return updatedPointNames;
-    });
+      });
 
-    setPoints(updatedPoints);
-    setDraggingPoint({ x, y, name: draggingPoint.name }); // Include the name
-}
-
+      setPoints(updatedPoints);
+      setDraggingPoint({ x, y, name: draggingPoint.name }); // Include the name
+    }
 
     if (isDraggingPoint.current && draggingPoint) {
       setDraggingPoint({ x, y, name: draggingPoint.name });
