@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -22,41 +24,100 @@ export function UserAuthForm({
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [showPassword, setShowPassword] = React.useState(false);
   const [, setPassword] = React.useState("");
+  const navigate = useNavigate();
+  const apiKey = import.meta.env.VITE_BASE_URL;
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
+  const validatePassword = (password: string): boolean => {
+    // Regular expression to check if the password has at least 6 characters and contains both alphabets and numbers
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
+    return passwordRegex.test(password);
+  };
+
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
     setIsLoading(true);
-
+  
     const email = (event.target as HTMLFormElement).email.value;
     const password = (event.target as HTMLFormElement).password.value;
+    const firstName = authFor=="signup"?(event.target as HTMLFormElement).firstName.value:'';
+    const lastName = authFor=="signup"?(event.target as HTMLFormElement).lastName.value:'';
     setPassword(password);
-
+  
     if (!email || !password) {
       toast.error("Please enter all fields");
       setIsLoading(false);
       return;
     }
-    // validating the password
-    if (password.length < 6) {
-      toast.error("Password should be at least 6 characters");
+  
+    if (authFor === "signup" && (!firstName || !lastName)) {
+      toast.error("Please enter all fields");
       setIsLoading(false);
       return;
     }
-    // also making sure the password is strong
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
-    if (!regex.test(password)) {
+  
+    if (!validatePassword(password)) {
       toast.error(
-        "Password should be at least 8 characters, one uppercase, one lowercase and one number"
+        "Password should be exactly 6 characters and contain at least one alphabet and one number"
       );
       setIsLoading(false);
       return;
     }
-    console.log(email, password);
+  
+    try {
+      let authValue = "";
+      let navigateTo = "";
+  
+      if (authFor === "signup") {
+        authValue = "register";
+        const response = await axios.post(`${apiKey}/auth/${authValue}`, {
+          firstName,
+          lastName,
+          email,
+          password,
+          role: "USER",
+        });
+  
+        const { access_token, refresh_token } = response.data;
+        localStorage.setItem("access_token", access_token);
+        localStorage.setItem("refresh_token", refresh_token);
+        setIsLoading(false);
+        toast.success("Successfully Signed up");
+        (event.target as HTMLFormElement).firstName.value = "";
+        (event.target as HTMLFormElement).lastName.value = "";
+        (event.target as HTMLFormElement).email.value = "";
+        (event.target as HTMLFormElement).password.value = "";
+        navigateTo = "/list-patients";
+      } else {
+        authValue = "authenticate";
+        const response = await axios.post(`${apiKey}/auth/${authValue}`, {
+          email,
+          password,
+        });
+  
+        const { access_token, refresh_token } = response.data;
+        localStorage.setItem("access_token", access_token);
+        localStorage.setItem("refresh_token", refresh_token);
+        setIsLoading(false);
+        toast.success("Successfully logged in");
+        (event.target as HTMLFormElement).email.value = "";
+        (event.target as HTMLFormElement).password.value = "";
+        navigateTo = "/list-patients";
+      }
+  
+      // Use navigate hook to redirect
+     
+      navigate(navigateTo);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+      toast.error("Some error occurred");
+    }
   }
+  
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>
@@ -64,6 +125,28 @@ export function UserAuthForm({
       <form onSubmit={onSubmit}>
         <div className="grid gap-2">
           <div className="grid gap-1">
+            {authFor == "signup" ? (
+              <Input
+                id="firstName"
+                placeholder="first name"
+                type="text"
+                autoCapitalize="none"
+                autoComplete="firstName"
+                autoCorrect="off"
+                disabled={isLoading}
+              />
+            ) : null}
+            {authFor == "signup" ? (
+              <Input
+                id="lastName"
+                placeholder="last name"
+                type="text"
+                autoCapitalize="none"
+                autoComplete="lastName"
+                autoCorrect="off"
+                disabled={isLoading}
+              />
+            ) : null}
             <Label className="sr-only" htmlFor="email">
               Email
             </Label>

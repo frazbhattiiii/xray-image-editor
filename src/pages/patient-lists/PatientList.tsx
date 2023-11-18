@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Patients } from "@/data/patients";
+import axios from "axios";
 import {
   Dialog,
   DialogContent,
@@ -19,29 +19,87 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 import { AddPatientForm } from "@/components/common/add-patient-form";
 
 const PatientList = () => {
   const [query, setQuery] = useState("");
-  const [filteredPatients, setFilteredPatients] = useState(Patients);
+  const [patients, setPatients] = useState([]);
+  const [filteredPatients, setFilteredPatients] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const apiKey = import.meta.env.VITE_BASE_URL;
+
+  const fetchPatients = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`${apiKey}/patients/getPatients`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
+      const data = await response.data;
+      console.log(response.data.data.Patients);
+      setPatients(data.data.Patients);
+      setFilteredPatients(data.data.Patients);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch patients initially and after adding a new patient
+  useEffect(() => {
+    fetchPatients();
+  }, []);
 
   const handleSearch = () => {
-    const filteredPatients = Patients.filter((patient) =>
+    const filtered = patients.filter((patient) =>
       patient.name.toLowerCase().includes(query.toLowerCase())
     );
-    setFilteredPatients(filteredPatients);
+    setFilteredPatients(filtered);
   };
 
   useEffect(() => {
     handleSearch();
-  }, [query]);
+  }, [query, patients]);
 
-  useEffect(() => {
-    if (query === "") {
-      setFilteredPatients(Patients);
+  const deletePatient = async (patientId) => {
+    console.log(patientId)
+    try {
+      const response = await axios.post(
+        `${apiKey}/patients/deletePatients?patientId=${patientId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        console.log("Patient deleted successfully");
+
+        // Refresh the patient list to reflect the deletion
+        fetchPatients();
+      }
+    } catch (err) {
+      console.log(err);
     }
-  }, [query]);
+  };
 
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
   return (
     <div>
       <Link to="/" className="flex justify-center items-center mt-10">
@@ -63,7 +121,7 @@ const PatientList = () => {
             <DialogHeader>
               <DialogTitle className="mb-4">Add a new Patient</DialogTitle>
               <DialogDescription>
-                <AddPatientForm />
+                <AddPatientForm onPatientAdded={fetchPatients} />
               </DialogDescription>
             </DialogHeader>
           </DialogContent>
@@ -105,7 +163,30 @@ const PatientList = () => {
                   <Edit className="h-8 w-8 cursor-pointer bg-slate-200 text-red-500 p-2 rounded-md hover:text-red-600" />
                 </TableCell>
                 <TableCell className="text-right w-12/12">
-                  <Trash2 className="h-8 w-8 cursor-pointer bg-slate-200 text-red-500 p-2 rounded-md hover:text-red-600" />
+                  <AlertDialog>
+                    <AlertDialogTrigger>
+                      <Trash2
+                        className="h-8 w-8 cursor-pointer bg-slate-200 text-red-500 p-2 rounded-md hover:text-red-600"
+                       
+                      />
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Are you absolutely sure?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently
+                          delete the patient and remove your data from our
+                          servers.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction  onClick={() => deletePatient(patient.patientId)}>Continue</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </TableCell>
               </TableRow>
             ))}

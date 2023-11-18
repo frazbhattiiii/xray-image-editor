@@ -15,8 +15,9 @@ import {
   Hand,
 } from "lucide-react";
 import { imagePathAtom } from "@/atom/atom";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { Button } from "../ui/button";
+import { AIPoints,AIPointNames } from "@/atom/atom";
 
 interface Point {
   x: number;
@@ -35,12 +36,9 @@ const CANVAS_WIDTH = 600;
 const CANVAS_HEIGHT = 600;
 
 function ImageEditorComponent() {
-  const [points, setPoints] = useState<Point[]>([
-    { x: 50, y: 50 },
-    { x: 150, y: 50 },
-    { x: 50, y: 150 },
-    { x: 150, y: 150 },
-  ]);
+  const ai_points = useAtomValue(AIPoints);
+  const ai_point_names = useAtomValue(AIPointNames);
+  const [points, setPoints] = useState<Point[]>(ai_points);
   const [, setIsDrawingLine] = useState<boolean>(false);
   const [lines, setLines] = useState<Line[]>([]);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -49,12 +47,7 @@ function ImageEditorComponent() {
   const isRemovingPoint = useRef<boolean>(false);
   const isRenamingPoint = useRef<boolean>(false); // Add a flag for renaming
   const isDrawingLine = useRef<boolean>(false);
-  const [pointNames, setPointNames] = useState<PointNames>({
-    "50-50": "Point 1",
-    "150-50": "Point 2",
-    "50-150": "Point 3",
-    "150-150": "Point 4",
-  });
+  const [pointNames, setPointNames] = useState<PointNames>(ai_point_names);
   const [pointNameInput, setPointNameInput] = useState<string>("");
   const [showPointNameInput, setShowPointNameInput] = useState<boolean>(false);
   const [draggingPoint, setDraggingPoint] = useState<Point | null>(null);
@@ -69,7 +62,7 @@ function ImageEditorComponent() {
   const [, setScaleY] = useState(1);
   const [isHandToolActive, setIsHandToolActive] = useState<boolean>(false);
   
-
+ 
   const drawPoints = (ctx: CanvasRenderingContext2D, pointsToDraw: Point[]) => {
     ctx.fillStyle = "yellow";
     ctx.font = "18px Arial";
@@ -171,6 +164,12 @@ function ImageEditorComponent() {
     }
   }, [points, lines]);
 
+  useEffect(()=>{
+    setPoints(ai_points);
+    setPointNames(ai_point_names)
+  },[ai_point_names,ai_points])
+
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -183,13 +182,6 @@ function ImageEditorComponent() {
     }
   }, [brightness, contrast]);
 
-  const enableDragging = () => {
-    isDraggingPoint.current = true;
-    isAddingPoint.current = false;
-    isRemovingPoint.current = false;
-    isDrawingLine.current = false;
-    setShowPointNameInput(false);
-  };
 
   const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     console.log("Dragging point:", draggingPoint);

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon, CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
@@ -29,8 +30,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { toast } from "@/components/ui/use-toast";
-import { Toaster } from "../ui/toaster";
+
+import axios from "axios";
+import { Toaster ,toast} from "react-hot-toast";
 
 const gender = [
   { label: "Male", value: "male" },
@@ -66,28 +68,41 @@ const defaultValues: Partial<PatientFormValues> = {
   // dob: new Date("2023-01-23"),
 };
 
-export function AddPatientForm() {
+export function AddPatientForm({ onPatientAdded }) {
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(patientFormSchema),
     defaultValues,
   });
+  const apiKey = import.meta.env.VITE_BASE_URL;
 
-  function onSubmit(data: PatientFormValues) {
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-    // reset all form values
-    form.reset();
+  async function onSubmit(data: PatientFormValues) {
+    try {
+      // Wait for the axios post request to complete
+      await axios.post(`${apiKey}/patients/addPatient`, data, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
+
+      form.reset();
+      toast.success("Patient Added Successfully")
+
+      setTimeout(()=>{
+        onPatientAdded()
+      },1000)
+      
+      // Show success toast
+
+      // Reset form
+    } catch (error) {
+      console.error(error);
+      // Handle error (show error toast or message)
+    }
   }
 
   return (
     <Form {...form}>
-      <Toaster />
+      <Toaster/>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
