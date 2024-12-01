@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+// import React, { useEffect, useState } from "react";
+import { Routes, Route } from "react-router-dom";
 import Login from "@/pages/auth/Login";
 import SignUp from "@/pages/auth/Signup";
 import ForgotPasswordPage from "@/pages/auth/ForgotPassword";
@@ -11,36 +11,35 @@ import Timeline from "@/pages/timeline/Timeline";
 import Home from "./pages/Home";
 import "./App.css";
 
-const ProtectedRoute: React.FC<{ element: React.ReactNode }> = ({
-  element,
-}) => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
-    const accessToken = localStorage.getItem("access_token");
-    return !!accessToken;
-  });
+// const ProtectedRoute: React.FC<{ element: React.ReactNode }> = ({
+//   element,
+// }) => {
+//   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+//     const accessToken = localStorage.getItem("access_token");
+//     return !!accessToken;
+//   });
 
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const accessToken = localStorage.getItem("access_token");
-      setIsLoggedIn(!!accessToken);
-    };
+//   useEffect(() => {
+//     const handleStorageChange = () => {
+//       const accessToken = localStorage.getItem("access_token");
+//       setIsLoggedIn(!!accessToken);
+//     };
 
-    window.addEventListener("storage", handleStorageChange);
+//     window.addEventListener("storage", handleStorageChange);
 
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, []);
+//     return () => {
+//       window.removeEventListener("storage", handleStorageChange);
+//     };
+//   }, []);
 
-  if (!isLoggedIn) {
-    return <Navigate to="/login" />;
-  }
+//   if (!isLoggedIn) {
+//     return <Navigate to="/login" />;
+//   }
 
-  return <>{element}</>;
-};
+//   return <>{element}</>;
+// };
 
 const App = () => {
-
   return (
     <div>
       <Routes>
@@ -51,7 +50,12 @@ const App = () => {
         <Route path="/update-password" element={<UpdatePasswordPage />} />
 
         {/* Protected routes */}
-        <Route
+        <Route path="/edit-image" element={<ImageEditor />} />
+        <Route path="/list-patients" element={<PatientList />} />
+        <Route path="/upload-image" element={<ImageUpload />} />
+        <Route path="/timeline" element={<Timeline />} />
+
+        {/* <Route
           path="/edit-image"
           element={<ProtectedRoute element={<ImageEditor />} />}
         />
@@ -66,7 +70,7 @@ const App = () => {
         <Route
           path="/timeline"
           element={<ProtectedRoute element={<Timeline />} />}
-        />
+        /> */}
       </Routes>
     </div>
   );
