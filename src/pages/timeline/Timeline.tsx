@@ -7,9 +7,9 @@ const timeLine = [
     title:"20-05-2023",
     description:"Timeline",
     images:[
-      "/src/assets/xray.jpg",
-      "/src/assets/xray1.jpeg",
-      "/src/assets/xray2.jpeg"
+      "/xray.jpg",
+      "/xray1.jpeg",
+      "/xray2.jpeg"
     ],
   
   },
@@ -18,9 +18,9 @@ const timeLine = [
     title:"02-08-2022",
     description:"Timeline",
     images:[
-      "/src/assets/xray.jpg",
-      "/src/assets/xray1.jpeg",
-      "/src/assets/xray2.jpeg"
+      "/xray.jpg",
+      "/xray1.jpeg",
+      "/xray2.jpeg"
     ],
   
   },{
@@ -28,9 +28,9 @@ const timeLine = [
     title:"28-03-2023",
     description:"Timeline",
     images:[
-      "/src/assets/xray.jpg",
-      "/src/assets/xray1.jpeg",
-      "/src/assets/xray2.jpeg"
+      "/xray.jpg",
+      "/xray1.jpeg",
+      "/xray2.jpeg"
     ],
   
   }
