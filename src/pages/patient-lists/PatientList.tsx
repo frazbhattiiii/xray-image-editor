@@ -33,12 +33,18 @@ import {
 
 import { AddPatientForm } from "@/components/common/add-patient-form";
 
+type Patient = {
+  id: string;   // Assuming the patient's ID is a string
+  name: string; // Assuming the patient's name is a string
+  // Add any other properties as necessary
+};
+
+
 const PatientList = () => {
   const [query, setQuery] = useState("");
-  const [patients, setPatients] = useState([]);
-  const [filteredPatients, setFilteredPatients] = useState([]);
+  const [patients, setPatients] = useState<Patient[]>([]); // Use the Patient type for the state
+  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
   const apiKey = import.meta.env.VITE_BASE_URL;
 
   const fetchPatients = async () => {
@@ -76,7 +82,7 @@ const PatientList = () => {
     handleSearch();
   }, [query, patients]);
 
-  const deletePatient = async (patientId) => {
+  const deletePatient = async (patientId:string) => {
     console.log(patientId)
     try {
       const response = await axios.post(
@@ -99,7 +105,6 @@ const PatientList = () => {
   };
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
   return (
     <div>
       <Link to="/" className="flex justify-center items-center mt-10">
@@ -183,7 +188,7 @@ const PatientList = () => {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction  onClick={() => deletePatient(patient.patientId)}>Continue</AlertDialogAction>
+                        <AlertDialogAction  onClick={() => deletePatient(patient.id)}>Continue</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon, CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
@@ -34,12 +33,14 @@ import {
 import axios from "axios";
 import { Toaster ,toast} from "react-hot-toast";
 
+// Gender options
 const gender = [
   { label: "Male", value: "male" },
   { label: "Female", value: "female" },
   { label: "Intersex", value: "intersex" },
 ] as const;
 
+// Zod schema for patient form validation
 const patientFormSchema = z.object({
   patientId: z.string().min(2, {
     message: "Patient Id must be at least 2 characters",
@@ -62,17 +63,24 @@ const patientFormSchema = z.object({
 
 type PatientFormValues = z.infer<typeof patientFormSchema>;
 
-// This can come from your database or API.
+// Default values (can be fetched from an API or database)
 const defaultValues: Partial<PatientFormValues> = {
   // name: "Your name",
   // dob: new Date("2023-01-23"),
 };
 
-export function AddPatientForm({ onPatientAdded }) {
+// Props type definition
+type AddPatientFormProps = {
+  onPatientAdded: () => void;  // The function type for onPatientAdded
+};
+
+// AddPatientForm component
+export function AddPatientForm({ onPatientAdded }: AddPatientFormProps) {
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(patientFormSchema),
     defaultValues,
   });
+
   const apiKey = import.meta.env.VITE_BASE_URL;
 
   async function onSubmit(data: PatientFormValues) {
@@ -85,15 +93,12 @@ export function AddPatientForm({ onPatientAdded }) {
       });
 
       form.reset();
-      toast.success("Patient Added Successfully")
+      toast.success("Patient Added Successfully");
 
-      setTimeout(()=>{
-        onPatientAdded()
-      },1000)
+      setTimeout(() => {
+        onPatientAdded(); // Call the function passed as a prop
+      }, 1000);
       
-      // Show success toast
-
-      // Reset form
     } catch (error) {
       console.error(error);
       // Handle error (show error toast or message)
@@ -102,7 +107,7 @@ export function AddPatientForm({ onPatientAdded }) {
 
   return (
     <Form {...form}>
-      <Toaster/>
+      <Toaster />
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
